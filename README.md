@@ -1,77 +1,49 @@
-# Image-Caption-Generator
+# Image Caption Generator
 
-## Current Project Layout
+Train an attention-based image captioning model on Flickr8k. The active implementation lives under `image-captioning/`; the root-level files are compatibility wrappers.
 
-The active implementation is now organized under the image-captioning folder:
+## Project Layout
 
+```text
 image-captioning/
-|- data/
-| |- flickr8k/
-|- src/
-| |- dataset.py
-| |- encoder.py
-| |- decoder.py
-| |- model.py
-| |- train.py
-| |- evaluate.py
-|- checkpoints/
-|- config.py
-|- requirements.txt
-
-## Migration Notes
-
-- Root-level files data_loader.py, model.py, and train.py are compatibility wrappers.
-- They now forward imports/execution to image-captioning/src.
-- New development should happen only inside image-captioning.
+  config.py
+  requirements.txt
+  checkpoints/
+  data/
+    flickr8k/
+      captions.txt
+      Images/
+  src/
+    dataset.py
+    encoder.py
+    decoder.py
+    model.py
+    train.py
+    evaluate.py
+    train_attention.py
+    evaluate_attention.py
+```
 
 ## Setup
 
-1. Install dependencies:
+1. Create and activate a Python environment.
+2. Install dependencies:
 
+   ```bash
    pip install -r image-captioning/requirements.txt
+   ```
 
-2. Put Flickr8k files in:
+3. Download the Flickr8k dataset and place it at:
 
+   ```text
    image-captioning/data/flickr8k/
+   ```
 
-   Expected files:
-   - captions.txt
-   - Images/ (directory with image files)
-
-3. Train model (recommended):
-
-   cd image-captioning
-   python -m src.train
-
-4. Evaluate BLEU demo:
-
-   cd image-captioning
-   python -m src.evaluate
-
-## Colab Run
-
-The safest way to run this project in Colab is to keep the repo and the Flickr8k data in Google Drive, then run the code from `image-captioning/` so the relative paths in `config.py` continue to work.
-
-1. In Colab, turn on GPU runtime.
-
-2. Mount Drive and clone or copy the repo into it.
-
-3. Make sure the dataset is available at:
-
-   image-captioning/data/flickr8k/
-
-   with both:
+   Required files:
    - `captions.txt`
    - `Images/`
 
-4. From the `image-captioning` directory, install the small missing dependencies. Colab already includes `torch` and `torchvision`, so reinstalling them is usually unnecessary.
-
-   ```python
-   %cd /content/drive/MyDrive/Image-Caption-Generator/image-captioning
-   !pip install Pillow nltk
-   ```
-
-5. Download the NLTK tokenizers used by the dataset loader.
+4. If you run the dataset loader locally or in Colab, download the NLTK tokenizers it uses:
 
    ```python
    import nltk
@@ -79,10 +51,26 @@ The safest way to run this project in Colab is to keep the repo and the Flickr8k
    nltk.download('punkt_tab')
    ```
 
-6. Train from the project directory.
+## Training
 
-   ```python
-   !python -m src.train
-   ```
+Run training from inside `image-captioning/` so the relative paths in `config.py` resolve correctly:
 
-7. Checkpoints are written to `image-captioning/checkpoints/`. If you want them to persist after the Colab session ends, keep that folder inside Drive or copy the checkpoint back to Drive when training finishes.
+```bash
+cd image-captioning
+python -m src.train
+```
+
+## Evaluation
+
+```bash
+cd image-captioning
+python -m src.evaluate
+```
+
+## Colab Notes
+
+The safest Colab setup is to keep the repository and dataset in Google Drive, then work from `image-captioning/`. Colab usually already includes `torch` and `torchvision`, so only install the smaller missing packages such as `Pillow` and `nltk` when needed.
+
+## Outputs
+
+Generated checkpoints are written to `image-captioning/checkpoints/`. The folder is ignored by Git so training artifacts do not get committed.

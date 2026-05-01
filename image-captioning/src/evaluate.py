@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 from typing import cast
+import textwrap
 
 import torch
 from nltk.translate.bleu_score import SmoothingFunction, corpus_bleu
@@ -220,19 +221,30 @@ def render_sample_image(image_tensor: torch.Tensor, generated_caption: List[str]
     image = image.clamp(0, 1)
     pil_image = to_pil_image(image)
 
+    generated_text = "Generated: " + " ".join(generated_caption)
+    reference_text = "References: " + \
+        " | ".join(" ".join(ref) for ref in reference_captions[:5])
+    generated_lines = textwrap.wrap(generated_text, width=40) or [
+        generated_text]
+    reference_lines = textwrap.wrap(reference_text, width=40) or [
+        reference_text]
+    annotation_height = max(
+        120, 20 * (len(generated_lines) + len(reference_lines) + 1))
+
     canvas = Image.new(
-        "RGB", (pil_image.width, pil_image.height + 140), color="white")
+        "RGB", (pil_image.width, pil_image.height + annotation_height), color="white")
     canvas.paste(pil_image, (0, 0))
 
     draw = ImageDraw.Draw(canvas)
     font = ImageFont.load_default()
-    generated_text = "Generated: " + " ".join(generated_caption)
-    reference_text = "References: " + \
-        " | ".join(" ".join(ref) for ref in reference_captions[:5])
-    draw.text((10, pil_image.height + 10),
-              generated_text, fill="black", font=font)
-    draw.text((10, pil_image.height + 30),
-              reference_text, fill="black", font=font)
+    y_offset = pil_image.height + 10
+    for line in generated_lines:
+        draw.text((10, y_offset), line, fill="black", font=font)
+        y_offset += 20
+    y_offset += 10
+    for line in reference_lines:
+        draw.text((10, y_offset), line, fill="black", font=font)
+        y_offset += 20
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     canvas.save(output_path)

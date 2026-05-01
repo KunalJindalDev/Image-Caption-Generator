@@ -25,10 +25,13 @@ class SoftAttention(nn.Module):
             alpha: Shape (B, 49).
         """
         encoder_proj = self.encoder_projection(encoder_out)  # (B, 49, 512)
-        decoder_proj = self.decoder_projection(decoder_hidden).unsqueeze(1)  # (B, 1, 512)
+        decoder_proj = self.decoder_projection(
+            decoder_hidden).unsqueeze(1)  # (B, 1, 512)
 
-        scores = self.score_projection(torch.tanh(encoder_proj + decoder_proj)).squeeze(2)  # (B, 49)
+        scores = self.score_projection(torch.tanh(
+            encoder_proj + decoder_proj)).squeeze(2)  # (B, 49)
         alpha = torch.softmax(scores, dim=1)  # (B, 49)
 
-        context = (alpha.unsqueeze(2) * encoder_out).sum(dim=1)  # (B, encoder_dim)
+        # (B, encoder_dim)
+        context = (alpha.unsqueeze(2) * encoder_out).sum(dim=1)
         return context, alpha
