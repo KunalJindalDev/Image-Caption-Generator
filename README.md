@@ -57,14 +57,14 @@ Run training from inside `image-captioning/` so the relative paths in `config.py
 
 ```bash
 cd image-captioning
-python -m src.train
+python -m src.train_attention
 ```
 
 ## Evaluation
 
 ```bash
 cd image-captioning
-python -m src.evaluate
+python -m src.evaluate_attention
 ```
 
 ## Colab Notes
