@@ -135,7 +135,7 @@ The introduction of **Soft Attention** helped the LSTM maintain spatial context 
 
 | Skateboarder Sample | Dog Hurdle Sample |
 |---|---|
-| `assets/random_sample_4.jpg` | `assets/random_sample_3.jpg` |
+| ![Skateboarder](assets/random_sample_4.png) | ![Dog Hurdle](assets/random_sample_3.png) |
 
 **Figure 1:** Unseen test samples evaluated using Beam Search with `k = 5`, demonstrating strong semantic understanding.
 
@@ -143,7 +143,7 @@ The introduction of **Soft Attention** helped the LSTM maintain spatial context 
 
 ## Attention Visualization
 
-![Attention Visualization](assets/sample_5_attention.jpg)
+![Attention Visualization](assets/sample_5_attention.png)
 
 **Figure 2:** Attention visualization using alpha weights. The heatmap shows that the model successfully localizes relevant visual regions, such as the subject wearing a red shirt, within the ResNet-50 feature map during sequential token generation.
 
