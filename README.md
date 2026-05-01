@@ -1,76 +1,162 @@
-# Image Caption Generator
+# Neural Image Captioning: Automated Description Generation from Visual Data
 
-Train an attention-based image captioning model on Flickr8k. The active implementation lives under `image-captioning/`; the root-level files are compatibility wrappers.
+**NC State AI Student Symposium 2026**  
+**ECE / CSC 525 | Team 109**
 
-## Project Layout
+**Team Members:** Kunal Jindal, Suyesh Jadhav, Karthik Suresh
+
+---
+
+## Problem Statement
+
+Image captioning sits at the intersection of **Computer Vision (CV)** and **Natural Language Processing (NLP)**. The goal is not only to detect objects in an image, but also to understand visual context, spatial relationships, and scene-level semantics well enough to generate a natural-language description.
+
+### Key Goals
+
+- Understand visual content beyond simple object detection.
+- Capture relationships between objects, actions, and scene context.
+- Train a deep learning model that can automatically generate descriptive captions for unseen images.
+
+---
+
+## Dataset
+
+We used the **Flickr8k** dataset for training and evaluation.
+
+| Component | Description |
+|---|---|
+| Dataset | Flickr8k |
+| Total Images | 8,091 |
+| Captions per Image | 5 human-written captions |
+| Total Captions | ~40,000 |
+| Task | Generate natural-language captions from images |
+
+### Preprocessing
+
+- Tokenized captions using `punkt`.
+- Added special sequence tokens: `<start>` and `<end>`.
+- Resized and center-cropped images.
+- Prepared image-caption pairs for supervised sequence generation.
+
+---
+
+## Approach
+
+Our system uses an **Encoder-Decoder architecture** to translate image pixels into natural-language text.
+
+### Encoder: Vision Module
+
+The encoder uses a **Convolutional Neural Network (CNN)** to extract high-level visual features from the input image.
+
+- Backbone: **ResNet-50**
+- Purpose: Convert an image into meaningful visual feature representations.
+- Output: Spatial feature vectors used by the decoder.
+
+### Decoder: Language Module
+
+The decoder uses an **LSTM** with a **Soft Attention mechanism** to generate captions word by word.
+
+- Model: LSTM decoder
+- Attention: Soft attention over image feature regions
+- Decoding Strategy: Beam Search with `k = 5`
+
+### Training Objective
+
+The model was trained to minimize **cross-entropy loss** over generated word sequences.
+
+- Loss Function: Cross-Entropy Loss
+- Training Duration: 20 epochs
+
+---
+
+## Network Architecture
+
+The model was implemented in **PyTorch** and trained on GPU hardware.
+
+| Component | Details |
+|---|---|
+| Framework | PyTorch `v2.10.0+cu128` |
+| GPU | Tesla T4 |
+| Encoder | ResNet-50 CNN |
+| Decoder | LSTM with Soft Attention |
+| Decoding | Beam Search, `k = 5` |
+| Training Objective | Cross-Entropy Loss |
+
+### Architecture Flow
 
 ```text
-image-captioning/
-  config.py
-  requirements.txt
-  checkpoints/
-  data/
-    flickr8k/
-      captions.txt
-      Images/
-  src/
-    dataset.py
-    encoder.py
-    decoder.py
-    model.py
-    train.py
-    evaluate.py
-    train_attention.py
-    evaluate_attention.py
+Raw Image
+   ↓
+ResNet-50 CNN Encoder
+   ↓
+Spatial Visual Feature Map
+   ↓
+Soft Attention Mechanism
+   ↓
+LSTM Decoder
+   ↓
+Sequential Word Prediction
+   ↓
+Generated Caption
 ```
 
-## Setup
+---
 
-1. Create and activate a Python environment.
-2. Install dependencies:
+## Evaluation Plan and Results
 
-   ```bash
-   pip install -r image-captioning/requirements.txt
-   ```
+To evaluate the effectiveness of our architectural improvements, we compared our final attention-based model against an early standard Encoder-Decoder baseline on the Flickr8k dataset.
 
-3. Download the Flickr8k dataset and place it at:
+The main goal of the ablation study was to isolate the impact of:
 
-   ```text
-   image-captioning/data/flickr8k/
-   ```
+- Soft Attention
+- Beam Search decoding
+- Improved spatial context preservation during caption generation
 
-   Required files:
-   - `captions.txt`
-   - `Images/`
+---
 
-4. If you run the dataset loader locally or in Colab, download the NLTK tokenizers it uses:
+## Ablation Study: Baseline vs. Attention
 
-   ```python
-   import nltk
-   nltk.download('punkt')
-   nltk.download('punkt_tab')
-   ```
+The baseline model used a vanilla Encoder-Decoder architecture with a CNN encoder and LSTM decoder. Our final model added a **Soft Attention mechanism** and used **Beam Search** to improve caption quality.
 
-## Training
+### Results
 
-Run training from inside `image-captioning/` so the relative paths in `config.py` resolve correctly:
+| Model | Architecture | BLEU-1 | BLEU-4 |
+|---|---|---:|---:|
+| Baseline | ResNet-101 + LSTM | 0.4180 | 0.0780 |
+| Ours | ResNet-50 + LSTM + Attention + Beam Search | **0.6717** | **0.2313** |
 
-```bash
-cd image-captioning
-python -m src.train_attention
-```
+### Key Finding
 
-## Evaluation
+The introduction of **Soft Attention** helped the LSTM maintain spatial context across timesteps, while **Beam Search** improved the quality of generated word sequences. Together, these changes produced a significant performance improvement over the vanilla baseline.
 
-```bash
-cd image-captioning
-python -m src.evaluate_attention
-```
+---
 
-## Colab Notes
+## Qualitative Results
 
-The safest Colab setup is to keep the repository and dataset in Google Drive, then work from `image-captioning/`. Colab usually already includes `torch` and `torchvision`, so only install the smaller missing packages such as `Pillow` and `nltk` when needed.
+| Skateboarder Sample | Dog Hurdle Sample |
+|---|---|
+| `assets/random_sample_4.jpg` | `assets/random_sample_3.jpg` |
 
-## Outputs
+**Figure 1:** Unseen test samples evaluated using Beam Search with `k = 5`, demonstrating strong semantic understanding.
 
-Generated checkpoints are written to `image-captioning/checkpoints/`. The folder is ignored by Git so training artifacts do not get committed.
+---
+
+## Attention Visualization
+
+![Attention Visualization](assets/sample_5_attention.jpg)
+
+**Figure 2:** Attention visualization using alpha weights. The heatmap shows that the model successfully localizes relevant visual regions, such as the subject wearing a red shirt, within the ResNet-50 feature map during sequential token generation.
+
+---
+
+## Main References
+
+1. **MS-COCO Dataset**  
+   https://cocodataset.org
+
+2. **Flickr8k Dataset**  
+   https://github.com/jbrownlee/Datasets/releases/tag/Flickr8k
+
+3. **Xu et al. — Show, Attend and Tell: Neural Image Caption Generation with Visual Attention**  
+   ICML 2015  
+   https://arxiv.org/abs/1502.03044
